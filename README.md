@@ -41,6 +41,8 @@ WowPacketParser
  and in a compiler-independent manner. You can download a GUI
  for your Windows OS and generate project files for example
  your Visual Studio.
+ 
+ Alternatively, compiled binaries can be download from https://github.com/Zedron/Whiff/wiki
     
 ### License
     GNU GPLv3
