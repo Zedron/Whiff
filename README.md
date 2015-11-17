@@ -19,7 +19,7 @@ WowPacketParser
 ### Usage
  - If you wish to have named opcodes in the console, place your
     Opcodes.h(new opcode system) or Opcodes.cpp(old opcode system) or
-    Opcodes.cs(WowPacketParser) in the same directory as your executable
+    Opcodes.cs(WowPacketParser) in the same directory as your Whiff executable
  - Start Whiff (or Whiff-64) from the same directory as Whiff.dll
  - If you want to stop sniffing type 'quit' into the console or CTRL-C
  - .pkt file containing the dumped packets is located where the
