@@ -8,23 +8,25 @@
 #include <string>
 #include "Addresses.h"
 
-#define WOW_PROCESSES 8
-
 struct BasicAppInfo
 {
     bool is64;
     std::string processName;
 };
 
-static BasicAppInfo WoWProcesses[WOW_PROCESSES] = {
+static std::vector<BasicAppInfo> WoWProcesses = {
     { true,  "wow-64.exe"          },
     { true,  "wow-64_patched.exe"  },
     { true,  "wowt-64.exe"         },
     { true,  "wowt-64_patched.exe" },
+    { true,  "wowb-64.exe"         },
+    { true,  "wowb-64_patched.exe" },
     { false, "wow.exe"             },
     { false, "wow_patched.exe"     },
     { false, "wowt.exe"            },
     { false, "wowt_patched.exe"    },
+    { false, "wowb.exe"            },
+    { false, "wowb_patched.exe"    },
 };
 
 // this DLL will be injected
@@ -281,14 +283,14 @@ HANDLE OpenClientProcess(DWORD processID)
 DWORD SelectProcess(const char* processName)
 {
     PIDMap pids;
-    if (!processName)
+
+    if (processName)
+        GetProcessIDsByName(pids, processName);
+    else
     {
-        for (char i = 0; i < WOW_PROCESSES; ++i)
-        {
-            BasicAppInfo const& appInfo = WoWProcesses[i];
+        for (BasicAppInfo const& appInfo : WoWProcesses)
             if (Program::Is64Bit() == appInfo.is64)
                 GetProcessIDsByName(pids, appInfo.processName);
-        }
     }
 
     if (pids.empty())

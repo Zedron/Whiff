@@ -62,9 +62,12 @@ DWORD MainThreadControl(LPVOID /* param */)
         system("pause");
         FreeLibraryAndExitThread((HMODULE)instanceDLL, 0);
     }
-    printf("Detected build: %hu\n", buildNumber);
+    printf("Detected Build: %hu\n", buildNumber);
 
     sSniffer->SetBuild(buildNumber);
+
+    sSniffer->FindExpansion(buildNumber);
+    printf("Detected Expansion: %u\n", sSniffer->GetExpansion());
 
     ClientAddresses::InitAddresses();
     ClientAddresses::Addresses* addresses = ClientAddresses::GetFuncAddresses(buildNumber);

@@ -72,6 +72,8 @@ public:
 
 public:
     DWORD GetBuild() { return m_build; }
+    Expansions GetExpansion() { return m_expansion; }
+    Expansions FindExpansion(DWORD build);
 
     void SetTestClient() { m_isTestClient = true; }
     bool IsTestClient() { return m_isTestClient; }
@@ -90,6 +92,7 @@ private:
     HANDLE m_handle;
 
     bool m_isTestClient;
+    Expansions m_expansion;
 
     unsigned int GetOpcodeFromParam(char* param);
 

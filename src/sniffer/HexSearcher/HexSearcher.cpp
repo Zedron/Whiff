@@ -110,6 +110,9 @@ Offsets HexSearcher::FindOffsets(std::vector<unsigned char> const& pattern, size
 
 HexFindResult HexSearcher::FindOffsets(std::vector<unsigned char> const& pattern, size_t limit, ADDRESS& address, const char* func)
 {
+    if (pattern.empty())
+        return HexFindResult(ERR_NOTFOUND, func);
+
     if (address)
         return HexFindResult(ERR_ALREADY_EXISTS, func);
 

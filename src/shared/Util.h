@@ -99,36 +99,6 @@ enum Expansions
     MAX_EXPANSION
 };
 
-
-static Expansions GetExpansion(DWORD build)
-{
-    // 6.0.2
-    if (build >= 19033)
-        return EXPANSION_WOD;
-
-    // 5.0.4
-    if (build >= 16016)
-        return EXPANSION_MOP;
-
-    // 4.0.1
-    if (build >= 13164)
-        return EXPANSION_CATA;
-
-    // 3.0.2
-    if (build >= 9056)
-        return EXPANSION_WOTLK;
-
-    // 2.0.1
-    if (build >= 6180)
-        return EXPANSION_TBC;
-
-    // 1.1.0
-    if (build >= 4044)
-        return EXPANSION_VANILLA;
-
-    return EXPANSION_NONE;
-}
-
 bool WStrToUtf8(std::wstring const& wstr, std::string& utf8str);
 bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
 

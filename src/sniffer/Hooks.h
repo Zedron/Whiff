@@ -50,7 +50,7 @@ namespace Trampolines
 
         bool Init()
         {
-            ASSERT(GetExpansion(sSniffer->GetBuild()) == EXPANSION_VANILLA);
+            ASSERT(sSniffer->GetExpansion() == EXPANSION_VANILLA);
 
             if (!InitProcessMessage())
                 return false;
@@ -71,7 +71,7 @@ namespace Trampolines
 
         bool Init()
         {
-            ASSERT(GetExpansion(sSniffer->GetBuild()) == EXPANSION_TBC);
+            ASSERT(sSniffer->GetExpansion() == EXPANSION_TBC);
 
             if (!InitProcessMessage())
                 return false;
@@ -107,7 +107,7 @@ namespace Trampolines
 
         bool Init()
         {
-            ASSERT(GetExpansion(sSniffer->GetBuild()) == EXPANSION_WOTLK);
+            ASSERT(sSniffer->GetExpansion() == EXPANSION_WOTLK);
 
             if (!InitProcessMessage())
                 return false;
@@ -128,7 +128,7 @@ namespace Trampolines
 
         bool Init()
         {
-            ASSERT(GetExpansion(sSniffer->GetBuild()) == EXPANSION_CATA);
+            ASSERT(sSniffer->GetExpansion() == EXPANSION_CATA);
 
             if (!InitProcessMessage())
                 return false;
@@ -164,7 +164,7 @@ namespace Trampolines
 
         bool Init()
         {
-            ASSERT(GetExpansion(sSniffer->GetBuild()) == EXPANSION_MOP);
+            ASSERT(sSniffer->GetExpansion() == EXPANSION_MOP);
 
             if (!InitProcessMessage())
                 return false;
@@ -348,21 +348,25 @@ namespace Trampolines
 
         bool Init()
         {
-            ASSERT(GetExpansion(sSniffer->GetBuild()) == EXPANSION_WOD);
+            ASSERT(sSniffer->GetExpansion() == EXPANSION_WOD);
             return (Program::Is64Bit() ? x64::Init() : x86::Init());
         }
     }
 
     namespace Legion
     {
-        bool Init() { return true; }
+        bool Init()
+        {
+            ASSERT(sSniffer->GetExpansion() == EXPANSION_LEGION);
+            return (Program::Is64Bit() ? WoD::x64::Init() : WoD::x86::Init());
+        }
 
-        std::string GetLocale() { return std::string(); }
+        std::string GetLocale() { return WoD::GetLocale(); }
     }
 
     std::string GetLocale()
     {
-        switch (GetExpansion(sSniffer->GetBuild()))
+        switch (sSniffer->GetExpansion())
         {
             case EXPANSION_VANILLA: return Vanilla::GetLocale();
             case EXPANSION_TBC:     return     TBC::GetLocale();
@@ -377,7 +381,7 @@ namespace Trampolines
 
     bool Init()
     {
-        switch (GetExpansion(sSniffer->GetBuild()))
+        switch (sSniffer->GetExpansion())
         {
             case EXPANSION_VANILLA: return Vanilla::Init();
             case EXPANSION_TBC:     return     TBC::Init();

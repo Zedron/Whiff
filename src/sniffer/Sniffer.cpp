@@ -4,7 +4,7 @@
 
 std::atomic<bool> Sniffer::m_stopEvent(false);
 
-Sniffer::Sniffer() : m_isTestClient(false) { }
+Sniffer::Sniffer() : m_isTestClient(false), m_expansion(EXPANSION_NONE) { }
 
 Sniffer::~Sniffer() { }
 
@@ -107,4 +107,57 @@ void Sniffer::DumpPacket(PacketInfo const& info)
     fflush(m_fileDump);
 
     dumpMutex.unlock();
+}
+
+Expansions Sniffer::FindExpansion(DWORD build)
+{
+    // 6.0.2
+    if (build >= 19033)
+    {
+        ADDRESS addr = 0x0;
+        HexFindResult res = sHexSearcher->FindOffsets({ '<', 'V', 'e', 'r', 's', 'i', 'o', 'n', '>' }, 0, addr, "Version");
+        if (res.Err != ERR_OK)
+            return EXPANSION_NONE;
+
+        std::string version = sHexSearcher->ReadString(addr, 11);
+        m_expansion = (Expansions)(version.back() - 48);
+        return m_expansion;
+    }
+
+    // 5.0.4
+    if (build >= 16016)
+    {
+        m_expansion = EXPANSION_MOP;
+        return m_expansion;
+    }
+
+    // 4.0.1
+    if (build >= 13164)
+    {
+        m_expansion = EXPANSION_CATA;
+        return m_expansion;
+    }
+
+    // 3.0.2
+    if (build >= 9056)
+    {
+        m_expansion = EXPANSION_WOTLK;
+        return m_expansion;
+    }
+
+    // 2.0.1
+    if (build >= 6180)
+    {
+        m_expansion = EXPANSION_TBC;
+        return m_expansion;
+    }
+
+    // 1.1.0
+    if (build >= 4044)
+    {
+        m_expansion = EXPANSION_VANILLA;
+        return m_expansion;
+    }
+
+    return EXPANSION_NONE;
 }
