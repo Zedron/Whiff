@@ -30,9 +30,14 @@ std::string Sniffer::GetLocale()
 
 void Sniffer::DumpPacket(PacketInfo const& info)
 {
-    DWORD packetOpcode = info.opcodeSize == 4
-        ? *(DWORD*)info.dataStore->buffer
-        : *(WORD*)info.dataStore->buffer;
+    DWORD packetOpcode = 0x0;
+    switch (info.opcodeSize)
+    {
+        case 2: packetOpcode = *(WORD*)info.dataStore->buffer; break;
+        case 4: packetOpcode = *(DWORD*)info.dataStore->buffer; break;
+        case 6: packetOpcode = *(WORD*)(info.dataStore->buffer + 4); break;
+        default: break;
+    }
 
     if (!sOpcodeMgr->ShouldShowOpcode(packetOpcode, info.packetType))
         return;
@@ -92,12 +97,13 @@ void Sniffer::DumpPacket(PacketInfo const& info)
 
     BYTE* packetData     = info.dataStore->buffer + info.opcodeSize;
     DWORD packetDataSize = info.dataStore->size   - info.opcodeSize;
+    DWORD dataStoreSize  = info.dataStore->size   - info.opcodeSize + 4; // force opcode size 4 for WPP
 
     fwrite((DWORD*)&info.packetType,            4, 1, m_fileDump);  // direction of the packet
     fwrite((DWORD*)&info.connectionId,          4, 1, m_fileDump);  // connection id
     fwrite((DWORD*)&tickCount,                  4, 1, m_fileDump);  // timestamp of the packet
     fwrite((DWORD*)&optionalHeaderLength,       4, 1, m_fileDump);  // connection id
-    fwrite((DWORD*)&info.dataStore->size,       4, 1, m_fileDump);  // size of the packet + opcode lenght
+    fwrite((DWORD*)&dataStoreSize,              4, 1, m_fileDump);  // size of the packet + opcode length
     fwrite((DWORD*)&packetOpcode,               4, 1, m_fileDump);  // opcode
 
     fwrite(packetData, packetDataSize,          1, m_fileDump);  // data

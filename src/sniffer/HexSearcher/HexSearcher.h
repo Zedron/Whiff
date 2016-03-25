@@ -45,9 +45,9 @@ static const char* HexErrorString[ERR_MAX] = {
 
 struct HexFindResult
 {
-    HexFindResult(FindResults _err, const char* _name = "") : Err(_err), Name(_name)
+    HexFindResult(FindResults _err, const char* _name = "", bool displayError = true) : Err(_err), Name(_name)
     {
-        if (_err != ERR_OK && _err != ERR_ALREADY_EXISTS)
+        if (displayError && _err != ERR_OK && _err != ERR_ALREADY_EXISTS)
             printf("Failed to find %s, Error: %s\n", _name, HexErrorString[_err]);
     }
     FindResults Err;
@@ -69,7 +69,7 @@ public:
     ADDRESS GetModuleBegin();
 
     Offsets FindOffsets(std::vector<unsigned char> const& pattern, size_t limit = 0);
-    HexFindResult FindOffsets(std::vector<unsigned char> const& pattern, size_t limit, ADDRESS& address, const char* func);
+    HexFindResult FindOffsets(std::vector<unsigned char> const& pattern, size_t limit, ADDRESS& address, const char* func, bool displayError = true);
 
     std::string ReadString(ADDRESS start, size_t len, bool rebase = true);
     std::string ReadStringR(ADDRESS start, size_t len, bool rebase = true);

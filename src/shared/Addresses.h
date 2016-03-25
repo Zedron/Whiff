@@ -13,7 +13,7 @@ namespace ClientAddresses
     public:
         Addresses(ADDRESS _Send2 = 0x0, ADDRESS _ProcMessage = 0x0, ADDRESS _Locale = 0x0, ADDRESS _buildInfo = 0x0,
               ADDRESS oneMessageReady = 0x0, ADDRESS _CDGetInt32 = 0x0, ADDRESS _handleData = 0x0,
-              ADDRESS _getCurrentWoWLocale = 0x0, ADDRESS _getLocaleFromEnum = 0x0) :
+              ADDRESS _getCurrentWoWLocale = 0x0, ADDRESS _getLocaleFromEnum = 0x0, ADDRESS _CDGetInt16 = 0x0) :
             NetClient_Send2(_Send2),
             NetClient_ProcessMessage(_ProcMessage),
             Locale(_Locale),
@@ -22,7 +22,8 @@ namespace ClientAddresses
             CDataStore_GetInt32(_CDGetInt32),
             NetClient_HandleData(_handleData),
             GetCurrentWowLocale(_getCurrentWoWLocale),
-            GetLocaleNameFromWowEnum(_getLocaleFromEnum)
+            GetLocaleNameFromWowEnum(_getLocaleFromEnum),
+            CDataStore_GetInt16(_CDGetInt16)
         { }
 
         ADDRESS NetClient_Send2;
@@ -34,6 +35,7 @@ namespace ClientAddresses
         ADDRESS NetClient_HandleData;      // WoD x64
         ADDRESS GetCurrentWowLocale;
         ADDRESS GetLocaleNameFromWowEnum;
+        ADDRESS CDataStore_GetInt16;       // WoD x64 (post 20886)
 
         bool IsValid() { return NetClient_Send2 && (NetClient_ProcessMessage || (CDataStore_GetInt32 && NetClient_HandleData)); }
     };

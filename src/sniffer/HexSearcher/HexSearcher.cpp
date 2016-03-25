@@ -108,21 +108,21 @@ Offsets HexSearcher::FindOffsets(std::vector<unsigned char> const& pattern, size
     return offsets;
 }
 
-HexFindResult HexSearcher::FindOffsets(std::vector<unsigned char> const& pattern, size_t limit, ADDRESS& address, const char* func)
+HexFindResult HexSearcher::FindOffsets(std::vector<unsigned char> const& pattern, size_t limit, ADDRESS& address, const char* func, bool displayError)
 {
     if (address)
-        return HexFindResult(ERR_ALREADY_EXISTS, func);
+        return HexFindResult(ERR_ALREADY_EXISTS, func, displayError);
 
     Offsets offsets(FindOffsets(pattern, limit));
 
     if (offsets.empty())
-        return HexFindResult(ERR_NOTFOUND, func);
+        return HexFindResult(ERR_NOTFOUND, func, displayError);
 
     if (offsets.size() > 1)
-        return HexFindResult(ERR_MULTIPLE, func);
+        return HexFindResult(ERR_MULTIPLE, func, displayError);
 
     address = STATIC_REBASE(*offsets.begin());
-    return HexFindResult(ERR_OK, func);
+    return HexFindResult(ERR_OK, func, displayError);
 }
 
 std::string HexSearcher::ReadString(ADDRESS start, size_t len, bool rebase)

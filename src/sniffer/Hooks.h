@@ -178,15 +178,44 @@ namespace Trampolines
 
     namespace WoD
     {
+        WORD GetOpcodeSize(DWORD build, DWORD64 direction)
+        {
+            switch (direction)
+            {
+                case CMSG:
+                    if (build > 20886)
+                        return 6;
+
+                    return 4;
+                case SMSG:
+                    if (build > 20886)
+                        return 2;
+
+                    return 4;
+            }
+
+            return 4;
+        }
+
         namespace x86
         {
             int __fastcall NetClient_ProcessMessage(void* thisPTR, void* dummy, void* param1, void* param2, CDataStore* dataStore, void* connectionId)
             {
                 recvmtx.lock();
-                PacketInfo packetInfo(SMSG, (int)connectionId, 4, dataStore);
+                PacketInfo packetInfo(SMSG, (int)connectionId, GetOpcodeSize(sSniffer->GetBuild(), SMSG), dataStore);
                 sSniffer->DumpPacket(packetInfo);
                 int retCode = sDetourMgr->GetDetour<decltype(&NetClient_ProcessMessage)>(HOOK_PROCESSMESSAGE)->GetOriginalFunction()(thisPTR, dummy, param1, param2, dataStore, connectionId);
                 recvmtx.unlock();
+                return retCode;
+            }
+
+            int __fastcall NetClient_Send2(void* thisPTR, void* dummy, CDataStore* dataStore, int connectionId)
+            {
+                sendmtx.lock();
+                PacketInfo packetInfo(CMSG, connectionId, GetOpcodeSize(sSniffer->GetBuild(), CMSG), dataStore);
+                sSniffer->DumpPacket(packetInfo);
+                int retCode = sDetourMgr->GetDetour<decltype(&NetClient_Send2)>(HOOK_SEND2)->GetOriginalFunction()(thisPTR, dummy, dataStore, connectionId);
+                sendmtx.unlock();
                 return retCode;
             }
 
@@ -222,7 +251,11 @@ namespace Trampolines
                 return true;
             }
 
-            bool InitSend2() { return Vanilla::InitSend2(); }
+            bool InitSend2()
+            {
+                ClientAddresses::Addresses const* addresses = sSniffer->GetAddresses();
+                return sDetourMgr->CreateDetour<decltype(&NetClient_Send2)>(HOOK_SEND2, addresses->NetClient_Send2, &NetClient_Send2);
+            }
 
             bool Init()
             {
@@ -241,7 +274,7 @@ namespace Trampolines
             void __fastcall NetClient_Send2(void* thisPTR, CDataStore* dataStore, int connectionId)
             {
                 sendmtx.lock();
-                PacketInfo packetInfo(CMSG, connectionId, 4, dataStore);
+                PacketInfo packetInfo(CMSG, connectionId, GetOpcodeSize(sSniffer->GetBuild(), CMSG), dataStore);
                 sSniffer->DumpPacket(packetInfo);
                 sDetourMgr->GetDetour<decltype(&NetClient_Send2)>(HOOK_SEND2)->GetOriginalFunction()(thisPTR, dataStore, connectionId);
                 sendmtx.unlock();
@@ -266,6 +299,19 @@ namespace Trampolines
                 if (std::this_thread::get_id() == recvThreadId)
                 {
                     PacketInfo packetInfo(SMSG, 0, 4, dataStore);
+                    sSniffer->DumpPacket(packetInfo);
+                    recvThreadId = std::thread::id();
+                }
+                return ret;
+            }
+
+            __int64 __fastcall CDataStore_GetInt16(CDataStore* dataStore, void* unk)
+            {
+                __int64 ret = sDetourMgr->GetDetour<decltype(&CDataStore_GetInt16)>(HOOK_CDGETINT16)->GetOriginalFunction()(dataStore, unk);
+
+                if (std::this_thread::get_id() == recvThreadId)
+                {
+                    PacketInfo packetInfo(SMSG, 0, 2, dataStore);
                     sSniffer->DumpPacket(packetInfo);
                     recvThreadId = std::thread::id();
                 }
@@ -322,6 +368,12 @@ namespace Trampolines
                 return sDetourMgr->CreateDetour<decltype(&CDataStore_GetInt32)>(HOOK_CDGETINT32, addresses->CDataStore_GetInt32, &CDataStore_GetInt32);
             }
 
+            bool AttachCDGetInt16()
+            {
+                ClientAddresses::Addresses const* addresses = sSniffer->GetAddresses();
+                return sDetourMgr->CreateDetour<decltype(&CDataStore_GetInt16)>(HOOK_CDGETINT16, addresses->CDataStore_GetInt16, &CDataStore_GetInt16);
+            }
+
             bool AttachHandleData()
             {
                 recvThreadId = std::thread::id();
@@ -337,7 +389,7 @@ namespace Trampolines
                 if (!AttachHandleData())
                     return false;
 
-                if (!AttachCDGetInt32())
+                if (!(GetOpcodeSize(sSniffer->GetBuild(), SMSG) == 2 ? AttachCDGetInt16() : AttachCDGetInt32()))
                     return false;
 
                 return true;

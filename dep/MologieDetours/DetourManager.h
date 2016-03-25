@@ -12,6 +12,7 @@ enum Hooks
     HOOK_MESSAGEREADY,
     HOOK_HANDLEDATA,
     HOOK_CDGETINT32,
+    HOOK_CDGETINT16,
 };
 
 class DetourManager
